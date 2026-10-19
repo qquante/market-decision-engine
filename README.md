@@ -34,7 +34,7 @@ Internal package and module names are retained where changing them would affect 
 
 ## Setup
 
-Python >=3.10. Install with pip install -e . . Run python -m unittest discover -s tests -v. Historical replay fixtures are data, not new live captures.
+Python >=3.10. Install with pip install -e .. Run python -m unittest discover -s tests -v. Historical replay fixtures are data, not new live captures.
 
 Start from an isolated environment. Use `.env.example` when present and inspect the configuration loader: an example file is not necessarily loaded automatically. Runtime databases, real account sessions and private credentials are not bundled. Live integration prerequisites are separate from local tests.
 
