@@ -7,21 +7,34 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+import zipfile
 
 from omnia_trading.casebook import _csv, _validate_series, _verify_parameter_sources, validate_native_records, verify
 
-WINDOW = Path(__file__).resolve().parents[2] / 'examples/market-window-2026-09-28'
+FIXTURE_ARCHIVE = Path(__file__).resolve().parents[2] / 'examples/market-window-2026-09-28.zip'
 
 
 class CasebookTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.samples = [json.loads(line) for line in (WINDOW / 'observations.jsonl').read_text().splitlines()]
-        cls.decisions = [json.loads(line) for line in (WINDOW / 'native-decisions.jsonl').read_text().splitlines()]
-        cls.calls = [json.loads(line) for line in (WINDOW / 'native-calls.jsonl').read_text().splitlines()]
+        fixture = tempfile.TemporaryDirectory(prefix='market-casebook-')
+        cls.addClassCleanup(fixture.cleanup)
+        cls.window = Path(fixture.name)
+        with zipfile.ZipFile(FIXTURE_ARCHIVE) as archive:
+            members = archive.infolist()
+            if len(members) > 5000 or sum(info.file_size for info in members) > 100_000_000:
+                raise ValueError('oversized_casebook_fixture')
+            for info in members:
+                target = (cls.window / info.filename).resolve()
+                if not target.is_relative_to(cls.window.resolve()) or (info.external_attr >> 16) & 0o170000 == 0o120000:
+                    raise ValueError('unsafe_casebook_fixture_path')
+            archive.extractall(cls.window)
+        cls.samples = [json.loads(line) for line in (cls.window / 'observations.jsonl').read_text().splitlines()]
+        cls.decisions = [json.loads(line) for line in (cls.window / 'native-decisions.jsonl').read_text().splitlines()]
+        cls.calls = [json.loads(line) for line in (cls.window / 'native-calls.jsonl').read_text().splitlines()]
 
     def test_complete_published_window_replays_without_inference(self):
-        receipt = verify(WINDOW)
+        receipt = verify(self.window)
         self.assertEqual(receipt['observations'], 60)
         self.assertEqual(receipt['native_calls'], 180)
         self.assertEqual(receipt['series_recomputed'], 621)
