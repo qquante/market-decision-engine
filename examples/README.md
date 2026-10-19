@@ -2,8 +2,8 @@
 
 | Example | Contents |
 | --- | --- |
-| [Market window](market-window-2026-09-28/README.md) | All contracts, quote curves, native assessments and exit-policy timelines |
-| [Token index](market-window-2026-09-28/tokens/README.md) | One page per network and contract, including every pool series |
+| [Market window](market-window-2026-09-28.zip) | All contracts, quote curves, native assessments and exit-policy timelines |
+| [Token index](market-window-2026-09-28.zip) | One page per network and contract, including every pool series |
 | [Strategy request](strategy.jsonl) | Observation, account, position and policy input |
 | [Partial coverage](strategy-partial.jsonl) | Entry request using the parameters actually supplied |
 | [Observation input](input.jsonl) | Source data assessment without position decisions |

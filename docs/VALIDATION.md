@@ -6,7 +6,7 @@
 installed-wheel report/casebook commands passed. [Verification receipt](verification-0.5.0.json).
 
 The repository includes a frozen 15-minute market window with 60 observations,
-180 native responses and 621 report series. [Inspect the full window](../examples/market-window-2026-09-28/README.md).
+180 native responses and 621 report series. [Inspect the full window](../examples/market-window-2026-09-28.zip).
 
 Run `omnia-trading-casebook verify examples/market-window-2026-09-28` to check
 file hashes, native request bindings, every price trajectory and all 14,077

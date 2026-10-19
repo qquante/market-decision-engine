@@ -57,4 +57,4 @@ per-contract quote curves and complete JSON/CSV records. The output directory mu
 
 ## Published window
 
-[28 September 2026](../examples/market-window-2026-09-28/README.md) includes all contracts, native inputs/answers and per-series records. Verify it with `omnia-trading-casebook verify examples/market-window-2026-09-28`.
+[28 September 2026](../examples/market-window-2026-09-28.zip) includes all contracts, native inputs/answers and per-series records. Verify it with `omnia-trading-casebook verify examples/market-window-2026-09-28`.
