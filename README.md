@@ -39,3 +39,13 @@ These checks use offline fixtures or controlled backends.
 ## License
 
 See [LICENSE](LICENSE), [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+## Replay fixture
+
+The immutable historical casebook is packaged as `examples/market-window-2026-09-28.zip` instead of hundreds of generated Markdown pages. It retains the original manifest and file hashes. The regression suite extracts it into a temporary directory and verifies the complete dataset offline.
+
+To inspect it manually:
+
+```console
+python -m zipfile -e examples/market-window-2026-09-28.zip .local-casebook
+```

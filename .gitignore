@@ -65,3 +65,5 @@ storage_state*.json
 *.sqlite
 *.sqlite3
 *.db
+
+.local-casebook/
