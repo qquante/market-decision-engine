@@ -1,93 +1,54 @@
 # Market Decision Engine
 
-**Typed market observations, explainable position rules and replayable decisions.**
-
 ![Python: 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python) ![Records: SQLite](https://img.shields.io/badge/Records-SQLite-003B57?style=flat-square&logo=sqlite) ![Input: JSONL](https://img.shields.io/badge/Input-JSONL-555555?style=flat-square) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-555555?style=flat-square)](LICENSE)
 
-[Overview](#overview) · [Quickstart](#quickstart) · [Example](#example) · [Validation](#validation) · [Documentation](#documentation)
+Combine a market observation with account/position context and produce a typed, explainable position decision that can be replayed from retained evidence.
 
-## Overview
+The package separates assessment from deterministic position policy. Its output can propose sizing and an action; the integrating application still owns authorization, execution, position updates and settlement.
 
-A Python pipeline that combines evidence-linked market observations with account/position state and configurable policy. It records why a decision was produced, which inputs and model answers were used, and when the proposal expires. The application integrating the package owns execution and position updates.
+## Position lifecycle
 
-**Stack:** Python · typed contracts · SQLite · JSONL · configurable policies · local inference adapter
-
-## Position decisions
-
-| Component | Behavior |
+| Decision | Interpretation |
 | --- | --- |
-| SKIP | Inputs, coverage or policy checks do not permit a proposed entry/action. |
-| BUY | A new position passes the applicable entry, exposure and evidence requirements. |
-| HOLD / HOLD_BAG | Keep an existing position or its permitted residual allocation. |
-| PROFIT / TP / SL | Propose partial reduction or exit under configured thresholds; no settlement is implied. |
+| `SKIP` | Input coverage or policy does not permit the proposed action. |
+| `BUY` | Entry and exposure conditions permit a new proposal. |
+| `HOLD`, `HOLD_BAG` | Retain the current position or its permitted residual allocation. |
+| `PROFIT`, `TP`, `SL` | Propose a partial reduction or exit under the configured rules. |
 
-## Processing path
+These labels come from [strategy_contracts.py](src/omnia_trading/strategy_contracts.py). The same contract validates finite numbers, ratios, exposure ordering and position state. For example, entry budget cannot exceed the position limit, which cannot exceed the portfolio exposure limit.
 
 ```mermaid
 flowchart LR
-  A[Observation and position snapshot] --> B[Identity, unit and freshness checks]
-  B --> C[Typed assessment]
-  C --> D[Deterministic position policy]
-  D --> E[Decision, sizing and reasons]
-  E --> F[(Decision ledger)]
+  Observation[Observation and evidence] --> Checks[Identity, units and freshness]
+  Context[Account and position snapshot] --> Policy[Deterministic position policy]
+  Checks --> Assessment[Typed assessment]
+  Assessment --> Policy
+  Policy --> Decision[Action, sizing, reasons and expiry]
+  Decision --> Ledger[(Decision ledger)]
 ```
 
-## Quickstart
+## Inspect policy without loading a model
 
 ```console
-python -m venv .venv
-# Activate .venv, then:
 python -m pip install -e .
 omnia-trading --catalog
 omnia-trading --strategy-policy
 python -m unittest discover -s tests -v
 ```
 
-The package retains its original omnia-trading command names. Catalog/policy inspection does not load a model. Tests use historical records and controlled backends. New native inference requires the optional local runtime and an explicitly selected checkpoint revision.
+Command names retain the original `omnia-trading` package identity. Use a virtual environment and Python 3.10+ as declared by the package. New native inference requires the optional local runtime and a selected checkpoint revision.
 
-## Example
-
-**Inspect the included capture window offline**
-
-The historical casebook is distributed as a ZIP, keeping generated reports out of the root tree. From the repository root:
+## Replay the included historical window
 
 ```console
 python -m zipfile -e examples/market-window-2026-09-28.zip .local-casebook
 omnia-trading-casebook verify .local-casebook
 ```
 
-Verification checks archived records; it performs no new capture or model inference. [Strategy input](examples/strategy.jsonl) contains observation, context and policy. [Partial coverage](examples/strategy-partial.jsonl) demonstrates supplied-field handling. A decision label does not represent a placed order or realized return.
+The archived casebook verification previously checked 1,985 files, 60 observations, 180 archived native answers, 621 recomputed series and 14,077 decision events. It performs no new market capture or model inference. These are archive/consistency counts, not a profitability benchmark.
 
-## Configuration and storage
+[strategy.jsonl](examples/strategy.jsonl) and [strategy-partial.jsonl](examples/strategy-partial.jsonl) show full/partial input coverage. [STRATEGY.md](docs/STRATEGY.md) explains precedence and lifecycle, [reason codes](docs/DECISION_REASONS.md) explain decisions, and [parameters](docs/PARAMETERS.md) retain types and units. Runtime configuration is in [.env.example](.env.example).
 
-Source values retain units, timestamps, time windows and evidence references. Missing coverage remains missing. The [strategy contract](src/omnia_trading/strategy_contracts.py) validates exposure limits and ratios; deterministic checks constrain model-derived answers. Configure the ledger and local inference runtime through [.env.example](.env.example).
+**Technology:** Python · typed contracts · SQLite · JSONL · configurable policies · local inference adapter
 
-## Repository guide
-
-| Location | Responsibility |
-| --- | --- |
-| [src/omnia_trading/strategy.py](src/omnia_trading/strategy.py) | Position policy and decision processing |
-| [src/omnia_trading/strategy_contracts.py](src/omnia_trading/strategy_contracts.py) | Account/position contracts and policy defaults |
-| [src/omnia_trading/decision_notes.py](src/omnia_trading/decision_notes.py) | Evidence-linked explanations |
-| [src/omnia_trading/casebook.py](src/omnia_trading/casebook.py) | Capture-window export and verification |
-| [examples](examples) | JSONL input and archived casebook |
-
-## Validation
-
-These checks use offline fixtures or controlled backends.
-
-## Scope and operational boundaries
-
-This package proposes decisions and sizing. Execution authorization, wallet signing, fills and settlement belong to the integrating application. Historical captures and arithmetic policy timelines are not new trading results or model-quality benchmarks. Original Apache-2.0 attribution is retained.
-
-## Documentation
-
-- [Policy precedence and lifecycle](docs/STRATEGY.md)
-- [Reason codes and interpretation](docs/DECISION_REASONS.md)
-- [Parameter types and units](docs/PARAMETERS.md)
-- [Python and CLI interfaces](docs/API.md)
-- [Validation scope](docs/VALIDATION.md)
-
-## License and attribution
-
-See [LICENSE](LICENSE), [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Source license: [Apache-2.0](LICENSE). Existing upstream and third-party notices are retained.
