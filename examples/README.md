@@ -12,14 +12,22 @@ Market-window curves retain every quote and end at the last observed timestamp. 
 
 ## Inspect and verify
 
+The historical window is packaged as `market-window-2026-09-28.zip` in this
+repository. From the repository root, extract it before opening its index or
+running the verifier:
+
+```console
+python -m zipfile -e examples/market-window-2026-09-28.zip .local-casebook
+omnia-trading-casebook verify .local-casebook
+```
+
+The extracted `manifest.json`, reports and token index are under `.local-casebook/`.
+The archive and original evidence hashes remain unchanged.
+
 Open a token from the index to inspect its independent pool curves, complete
 quote timeline, native assessments and calculated exit-policy events. Price
 multiples use the first captured quote. Native model answers belong only to the
 assessed observations; neighboring series do not inherit them.
-
-```bash
-omnia-trading-casebook verify examples/market-window-2026-09-28
-```
 
 Verification uses file hashes, native request/answer bindings and recalculated
 quote results. No model download, provider credentials or RPC calls are required.
